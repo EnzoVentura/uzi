@@ -46,10 +46,11 @@ autonome. L'état de la mission vit dans `.uzi/<slug>/` (gitignoré).
 
 100 % natif Claude Code, **zéro AoE** :
 - **personas = subagents** (`agents/*.md`), dispatchés par Jack via le tool `Agent` ;
-- **review = Workflow tool** (`workflows/review-fanout.md`), fan-out parallèle à
-  asymétrie d'information + agrégation déterministe ;
-- **Agent Teams** (expérimental) en option `--team` pour une boucle Dev↔Reviewer
-  persistante (itération).
+- **review = fan-out parallèle** : Jack dispatche les 3 chasseurs en **un seul message**
+  (3 `Agent`), asymétrie d'information + agrégation déterministe (protocole
+  `workflows/review-fanout.md`). *(Le Workflow tool peut piloter ce fan-out en session
+  ultracode, mais le dispatch `Agent` est le défaut, sans dépendance.)*
+- **Agent Teams** (expérimental) en option `--team` — **non opérationnel en v0.1**.
 
 ## Installation
 
@@ -61,10 +62,14 @@ autonome. L'état de la mission vit dans `.uzi/<slug>/` (gitignoré).
 
 ## Permissions (repo cible)
 
-Le Dev commite/pushe déjà sur une branche (autorisé), et le QA lance l'app via
-**`npx nx serve <app>`** (ex. `npx nx serve web` → port 4200) — déjà couvert par le
-`Bash(npx nx *)` de `settings.local.json`. On **n'ajoute pas** `npm run start:*` en
-`allow` : `settings.json` (policy d'équipe) le `deny`, et `deny` l'emporte sur `allow`.
+Le Dev commite/pushe sur une branche (autorisé), et **Jack** lance l'app via
+**`npx nx serve <app>`** (ex. `npx nx serve web` → port 4200). On **n'ajoute pas**
+`npm run start:*` en `allow` : `settings.json` (policy d'équipe) le `deny`, et `deny`
+l'emporte sur `allow` — d'où le passage par `nx serve`.
+
+> Le pré-check de `/uzi-start` **vérifie** réellement les permissions du repo (il lit
+> `settings*.json`) au lieu de les présumer : il confirme qu'un `allow` couvre `nx serve`
+> et que `main` est protégé.
 
 La seule chose à ajouter, c'est la **protection de `main`** dans le `deny` local
 (`.claude/settings.local.json`, gitignoré = config perso) :

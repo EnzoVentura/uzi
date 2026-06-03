@@ -48,7 +48,10 @@ Tu écris **uniquement** `.uzi/<slug>/REVIEW-blind.md` :
 - frontmatter `{ angle: blind, verdict: APPROVED|CHANGES_REQUESTED|REJECTED, bloquants, warnings }` ;
 - findings groupés par sévérité, chacun `fichier:ligne — description` ;
 - verdict : `CHANGES_REQUESTED` si ≥ 1 🔴, sinon `APPROVED` ;
-- marqueur de fin `<!-- UZI_REVIEW_DONE -->`.
+- marqueur de fin `<!-- UZI_REVIEW_BLIND_DONE -->`.
+
+Jack te passe en INPUT **deux chemins absolus** : `_diff.patch` (entrée) et
+`REVIEW-blind.md` (sortie). Tu écris à ce chemin de sortie.
 
 ## Ce que tu ne fais jamais
 

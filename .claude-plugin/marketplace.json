@@ -31,6 +31,16 @@
         "./skills/uzi-state",
         "./skills/uzi-handoff",
         "./skills/uzi-local-skills"
+      ],
+      "agents": [
+        "./agents/manager",
+        "./agents/po",
+        "./agents/tech-lead",
+        "./agents/dev",
+        "./agents/qa",
+        "./agents/blind-hunter",
+        "./agents/edge-hunter",
+        "./agents/craft-reviewer"
       ]
     }
   ]

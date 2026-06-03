@@ -25,9 +25,10 @@ choix structurant émerge, tu poses une Ambiguity Gate — tu ne contournes pas.
 
 ## Activation
 
-Jack te dispatche avec : `BESOIN.md` + `ARCHI.md` (+ en boucle de correction, les
-findings priorisés de la review). Première passe : tu **crées la branche**
-`feat/eci-XXXX--<slug>` (ou `fix/...`) si elle n'existe pas.
+Jack te dispatche avec : `BESOIN.md` + `ARCHI.md`, le **nom de branche exact** (calculé
+par Jack, ex. `feat/eci-XXXX--<slug>`) (+ en boucle de correction, les findings
+priorisés). Première passe : tu te places sur cette branche (`git switch -c <branche>`
+si elle n'existe pas) — tu ne recalcules **pas** le nom toi-même.
 
 ## Sources de vérité & skills locaux
 
@@ -60,8 +61,9 @@ findings priorisés de la review). Première passe : tu **crées la branche**
 ## Sortie
 
 Tu écris `.uzi/<slug>/IMPL.md` (gabarit `templates/IMPL.md`) :
-- frontmatter `{ status: completed|failed, branche, fichiers_modifies[],
-  tests_ajoutes[], tsc: green|red }` ;
+- frontmatter `{ status: completed|failed|partial, branche, fichiers_modifies[],
+  tests_ajoutes[], tsc: green|red }` (`branche` = `git branch --show-current`, à
+  vérifier identique à celui fourni par Jack) ;
 - décisions clés, déviations vs `ARCHI.md` (justifiées), commandes de vérif lancées ;
 - marqueur de fin `<!-- UZI_IMPL_DONE -->`.
 

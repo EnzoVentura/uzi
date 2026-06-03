@@ -9,29 +9,40 @@ Workflow tool** — Jack dispatche les 3 chasseurs en parallèle via le tool `Ag
 - `slug` de la mission ;
 - la diff de la branche vs la base d'intégration (`main` par défaut).
 
-## Étape 1 — collecte de la diff
+## Étape 1 — collecte de la diff (base résolue, patch garde-fou)
 
-Jack écrit la diff brute dans `.uzi/<slug>/_diff.patch` :
+Jack résout la **base d'intégration** (ne présume pas `main`) puis écrit la diff sur le
+**merge-base** :
 
 ```bash
-git -C <repo> diff <base>..HEAD > .uzi/<slug>/_diff.patch
+base="${UZI_BASE:-$(git symbolic-ref --quiet refs/remotes/origin/HEAD | sed 's@^refs/remotes/origin/@@')}"
+base="${base:-main}"
+git fetch --quiet origin "$base" 2>/dev/null || true
+git diff "$(git merge-base "origin/$base" HEAD)"..HEAD > .uzi/<slug>/_diff.patch
 ```
+
+**Garde-fou** : si `_diff.patch` est **vide** ou si `git diff` a erré (base introuvable),
+**ne lance pas** le fan-out → escalade (les chasseurs concluraient `APPROVED` sur du vide).
 
 ## Étape 2 — fan-out parallèle (UN seul message, 3 `Agent`)
 
 Jack dispatche les **3 chasseurs en parallèle**, chacun avec **son** asymétrie :
 
-| Sous-agent | Input fourni | Asymétrie garantie par |
-|---|---|---|
-| `uzi:blind-hunter` (Bastien) | chemin de `_diff.patch` **seul** | ses tools : `Read, Write` (ni Grep, ni Glob, ni Bash → ne peut pas explorer) |
-| `uzi:edge-hunter` (Edgar) | `_diff.patch` + repo + `CLAUDE.md` | accès complet en lecture |
-| `uzi:craft-reviewer` (Yugo) | `_diff.patch` + rules craft | accès rules `~/.claude/rules/*` |
+Jack passe à chacun **les chemins absolus d'entrée ET de sortie** (le chasseur ne
+découvre rien) :
 
-Chacun écrit `REVIEW-{blind,edge,craft}.md` puis rend la main.
+| Sous-agent | Input (entrée + sortie) | Asymétrie garantie par | Marqueur de fin |
+|---|---|---|---|
+| `uzi:blind-hunter` (Bastien) | `_diff.patch` (entrée) + `REVIEW-blind.md` (sortie) — **rien d'autre** | ses tools `Read, Write` (ni Grep/Glob/Bash → **pas de découverte** ; il peut lire un chemin absolu donné, mais n'en connaît aucun) | `UZI_REVIEW_BLIND_DONE` |
+| `uzi:edge-hunter` (Edgar) | `_diff.patch` + repo + `CLAUDE.md` → `REVIEW-edge.md` | accès complet en lecture | `UZI_REVIEW_EDGE_DONE` |
+| `uzi:craft-reviewer` (Yugo) | `_diff.patch` + rules craft → `REVIEW-craft.md` | accès `~/.claude/rules/*` | `UZI_REVIEW_CRAFT_DONE` |
+
+Chacun écrit son fichier (au chemin de sortie fourni) puis rend la main.
 
 ## Étape 3 — agrégation déterministe → `REVIEW.md`
 
-Quand les 3 fichiers existent (verrou de complétude : fichier + `verdict` + marqueur) :
+Quand les 3 fichiers existent (verrou : fichier + `verdict` + marqueur d'angle
+`UZI_REVIEW_{BLIND,EDGE,CRAFT}_DONE`) :
 
 1. **Collecter** tous les findings des 3 angles.
 2. **Dédupliquer** par `fichier:ligne` (garder la sévérité la plus haute, mentionner les
@@ -47,8 +58,10 @@ Quand les 3 fichiers existent (verrou de complétude : fichier + `verdict` + mar
 ## Boucle de correction
 
 Si `CHANGES_REQUESTED` : Jack transmet à Aurélien les findings **priorisés** (🔴 + AC
-manquants d'abord) → nouvel `IMPL.md` → re-QA si surface UI touchée → **re-fanout**.
-Compteur `cycles.max` (défaut 2) ; épuisé → escalade.
+manquants d'abord) → nouvel `IMPL.md` → re-QA si surface UI touchée. Avant le
+**re-fanout**, Jack **régénère `_diff.patch`** (étape 1) — sinon les chasseurs
+re-reviewent l'ancienne diff — et archive les `REVIEW-*.md`/`REVIEW.md` du cycle
+précédent (ex. suffixe `-cycle<N>`). Compteur `cycles.max` (défaut 2) ; épuisé → escalade.
 
 ## Déclenchement isolé
 

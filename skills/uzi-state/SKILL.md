@@ -20,23 +20,41 @@ Mécanique de persistance de l'état. **Aucune logique métier.**
     └── preuves/*.png
 ```
 
-`.uzi/` doit être **gitignoré** dans le repo cible (ajouter `\.uzi/` au `.gitignore`
-si absent — vérification au pré-check de `/uzi-start`).
+`.uzi/` doit être **gitignoré** dans le repo cible. Au pré-check : `git check-ignore .uzi/`
+→ si non ignoré, ajouter la ligne **`.uzi/`** (exactement — pas `\.uzi/`, qui est de la
+syntaxe regex, pas gitignore) au `.gitignore`, puis revérifier avec `git check-ignore`.
+Le Dev ne fait **jamais** `git add .uzi/`.
 
-## Écriture atomique (obligatoire pour STATE.md et active.json)
+## Slug — déterministe et idempotent
 
-Jamais d'écriture en place sur un fichier d'état (risque de corruption si interruption).
-Toujours : écrire dans un fichier temporaire puis renommer.
+Le slug doit être **reproductible** (sinon `/uzi-resume` et `/uzi-review` ne retrouvent
+pas le dossier). Algorithme :
+
+1. base = description (ou résumé du ticket), **3-4 mots** significatifs ;
+2. minuscules ; translittération ASCII (`é→e`, `à→a`, `ç→c`…) ; apostrophes supprimées ;
+3. espaces → `-` ; tout caractère non `[a-z0-9-]` retiré ; tirets multiples compressés ;
+4. préfixe `eci-XXXX--` si ticket présent ;
+5. collision : si `.uzi/<slug>/` existe déjà pour une autre mission, suffixe `-2`, `-3`…
+
+Au **resume**, on ne recalcule jamais le slug : on le **relit** depuis `active.json` /
+`STATE.md`.
+
+## Écriture des artefacts
+
+Pour les fichiers markdown (`STATE.md`, `BESOIN.md`…), utilise les outils **`Write`/
+`Edit` natifs** du harness : ils écrivent de façon sûre et gèrent l'échappement (le
+contenu contient du YAML, des backticks, parfois des `EOF` — un heredoc bash serait
+fragile).
+
+Réserve le pattern atomique **temp + `mv`** (atomique sur le même FS) aux cas où c'est
+strictement nécessaire en shell :
 
 ```bash
-tmp="$(mktemp "${dir}/.STATE.XXXXXX")"
-cat > "$tmp" <<'EOF'
-<nouveau contenu>
-EOF
-mv -f "$tmp" "${dir}/STATE.md"
+tmp="$(mktemp "${dir}/.STATE.XXXXXX")"; printf '%s' "$content" > "$tmp"; mv -f "$tmp" "${dir}/STATE.md"
 ```
 
-Le `mv` sur le même système de fichiers est atomique → pas d'état intermédiaire visible.
+En mode `--parallel` (2 missions), `active.json` est **partagé** : sérialise son écriture
+(lockfile) ou interdis la concurrence — ne jamais écraser la liste des missions actives.
 
 ## STATE.md — frontmatter
 

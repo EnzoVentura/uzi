@@ -36,4 +36,4 @@ _(dédupliqués par `fichier:ligne`, avec les angles concordants entre parenthè
 
 _(boucle de correction priorisée si CHANGES_REQUESTED, ou feu vert ship si APPROVED)_
 
-<!-- UZI_REVIEW_DONE -->
+<!-- UZI_REVIEW_AGG_DONE -->

@@ -54,7 +54,7 @@ Tu écris **uniquement** `.uzi/<slug>/REVIEW-edge.md` :
 - frontmatter `{ angle: edge, verdict: APPROVED|CHANGES_REQUESTED|REJECTED, bloquants, warnings }` ;
 - findings par sévérité, chacun ancré `fichier:ligne` ;
 - verdict : `CHANGES_REQUESTED` si ≥ 1 🔴, sinon `APPROVED` ;
-- marqueur de fin `<!-- UZI_REVIEW_DONE -->`.
+- marqueur de fin `<!-- UZI_REVIEW_EDGE_DONE -->`.
 
 ## Ce que tu ne fais jamais
 

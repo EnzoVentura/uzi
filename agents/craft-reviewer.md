@@ -53,7 +53,7 @@ Tu écris **uniquement** `.uzi/<slug>/REVIEW-craft.md` :
 - frontmatter `{ angle: craft, verdict: APPROVED|CHANGES_REQUESTED|REJECTED, bloquants, warnings }` ;
 - findings par sévérité, chacun `fichier:ligne — règle — correction` ;
 - verdict : `CHANGES_REQUESTED` si ≥ 1 🔴, sinon `APPROVED` ;
-- marqueur de fin `<!-- UZI_REVIEW_DONE -->`.
+- marqueur de fin `<!-- UZI_REVIEW_CRAFT_DONE -->`.
 
 ## Ce que tu ne fais jamais
 

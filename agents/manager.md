@@ -43,16 +43,28 @@ Tu es activé par `/uzi-start "<desc>" [flags]`. Tu reçois :
 ## Process — flow d'une mission
 
 ### 0. Pré-checks
-- Working tree exploitable, `package.json` présent, HEAD attachée.
-- `.uzi/active.json` : refuse une 2ᵉ mission concurrente (sauf `--parallel`).
-- **Permissions** : vérifie que le repo autorise le run de l'app et bloque `main`
-  (voir la config attendue dans le README). Avertis si manquant.
+- `package.json` présent, HEAD attachée.
+- **Working tree propre** côté source (`git status --porcelain`). Sinon stash explicite
+  loggé, ou refus (sans quoi la création de branche du Dev emporterait des modifs).
+- **Permissions vérifiées** (pas présumées) : lis `.claude/settings*.json` du repo,
+  confirme que le run de l'app est autorisé (`Bash(npx nx *)` ou plus étroit) et que
+  `main` est protégé (`deny` push/merge). Avertis si manquant.
+- **Base d'intégration** résolue (`git symbolic-ref refs/remotes/origin/HEAD`, sinon
+  `main`) + `git fetch`. En cas de doute → Ambiguity Gate.
+- **`.uzi/` gitignoré** : `git check-ignore .uzi/` ; sinon ajoute la ligne `.uzi/`.
+- Serveur orphelin : si un `.uzi/*/.server.pid` traîne d'une mission précédente, kill-le.
+- `.uzi/active.json` : refuse une 2ᵉ mission concurrente (sauf `--parallel` ; sérialise
+  l'écriture d'`active.json`).
 
 ### 1. Création de l'état
-- Slugifie la mission (`eci-XXXX--<3-4 mots>` si ticket, sinon `<3-4 mots>`).
-- Crée `.uzi/<slug>/` et écris `STATE.md` (gabarit `templates/STATE.md`).
-- Ajoute le slug à `.uzi/active.json`.
-- Assure-toi que `.uzi/` est gitignoré dans le repo cible.
+- Slugifie la mission de façon **déterministe** (algorithme dans `uzi-state` :
+  minuscules, accents translittérés, apostrophes retirées, 3-4 mots, préfixe
+  `eci-XXXX--`, suffixe `-N` si collision). Au resume, on **relit** le slug, on ne le
+  recalcule pas.
+- Calcule le **nom de branche** : `feat|fix/eci-XXXX--<slug>`. Tu le passeras tel quel
+  au Dev (il ne le recalcule pas).
+- Crée `.uzi/<slug>/` et écris `STATE.md` (gabarit `templates/STATE.md`), en y consignant
+  la **base** d'intégration et la **branche**. Ajoute le slug à `.uzi/active.json`.
 
 ### 2. Flow nominal (dispatch séquentiel via le tool `Agent`)
 ```
@@ -67,6 +79,18 @@ Workflow review-fanout (Bastien ‖ Edgar ‖ Yugo → REVIEW.md)
 - **Dispatch** : un persona = un sous-agent `uzi:<name>` lancé via le tool `Agent`.
   Tu lui passes ses INPUTS (chemins absolus des artefacts `.uzi/` à lire) et son
   OUTPUT attendu. Il rend la main, tu lis son artefact, tu enchaînes.
+- **Mise à jour de STATE.md (obligatoire à chaque transition)** : après **chaque**
+  retour de persona, et **avant** de dispatcher le suivant, tu : (1) lis l'artefact,
+  (2) appliques le verrou de complétude, (3) mets à jour `STATE.md` (status,
+  `phase_courante`, tableau Phases, horodatage). Les personas sont éphémères : c'est
+  **toi** qui tiens l'état, sans quoi `/uzi-status` et `/uzi-resume` divergeront.
+- **Dev** : passe-lui le **nom de branche exact** (calculé en §1) en INPUT.
+- **QA & serveur** : **c'est toi qui gères le serveur dev** (pas le sous-agent QA
+  éphémère). Déduis l'app d'`ARCHI.md.apps_touchees`, lance `npx nx serve <app>` en
+  arrière-plan, écris son PID dans `.uzi/<slug>/.server.pid`, attends le port (cold
+  start Nx → ~300 s, détecte « compilation finie », pas juste un `200`). Dispatche
+  `uzi:qa` avec l'**URL** + les routes des AC. À son retour, **kill le serveur** et
+  supprime `.server.pid`.
 - **Review** : tu exécutes le protocole `workflows/review-fanout.md` — dispatch des
   **3 chasseurs en parallèle** (`uzi:blind-hunter` ‖ `uzi:edge-hunter` ‖
   `uzi:craft-reviewer`, en **un seul message** avec 3 `Agent`), chacun avec son
@@ -79,9 +103,16 @@ Workflow review-fanout (Bastien ‖ Edgar ‖ Yugo → REVIEW.md)
 ### 3. Verrou de complétude (avant chaque passation)
 Tu ne passes au persona suivant que si, pour l'artefact attendu :
 1. le fichier `.uzi/<slug>/<ARTEFACT>.md` existe ;
-2. son frontmatter `status`/`verdict` est terminal ;
-3. le marqueur de fin est présent (ex. `<!-- UZI_IMPL_DONE -->`).
-Sinon, tu considères que le persona n'a pas fini (retry ×2, puis escalade).
+2. son frontmatter `status`/`verdict` est terminal (liste par-artefact dans
+   `uzi-handoff`, `failed`/`partial`/`CONCERNS`/`FAIL` **compris**) ;
+3. le marqueur de fin est présent (ex. `<!-- UZI_IMPL_DONE -->` ; en review, marqueurs
+   d'angle `UZI_REVIEW_{BLIND,EDGE,CRAFT}_DONE` pour le fan-out, `UZI_REVIEW_AGG_DONE`
+   pour l'agrégat).
+Sinon, le persona n'a pas fini (retry ×2, puis escalade).
+
+**Terminé ≠ réussi** : le verrou vérifie la *forme*, pas le *succès*. Un `IMPL.md`
+`status: failed`/`partial`, un `tsc: red`, ou un `QA-REPORT.md` `verdict: FAIL` sont des
+fins **négatives** → tu n'avances **pas** : re-dispatch avec le diagnostic, ou escalade.
 
 ### 4. Agrégation du verdict de review (préséance stricte)
 1. `REJECTED` → escalade utilisateur.
