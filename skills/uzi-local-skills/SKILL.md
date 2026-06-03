@@ -40,6 +40,28 @@ Si un skill local attendu est **absent**, le persona bascule sur l'outillage glo
 | pas de stratégie de test | skill `test-strategy` |
 | `btoc-ticket` absent | Paul part de la description brute |
 
+## Décision de mode (à consigner dans `STATE.md`)
+
+Au pré-check, Jack tranche **un mode** selon ce qui est détecté :
+
+- **Mode projet** (ex. btoc) : ≥ 1 skill `<prefix>-*` métier détecté (`btoc-composant`,
+  `btoc-ticket`…). Les personas délèguent à ces skills ; Edgar lit le `CLAUDE.md` du repo
+  pour les conventions ; le reviewer local éventuel est ignoré (on garde les 3 chasseurs).
+- **Mode générique** (repo non outillé) : aucun skill métier détecté. uzi tourne quand
+  même :
+  - **Paul** part de la description / du ticket brut (pas de `btoc-ticket`).
+  - **Théo** lit le `CLAUDE.md` du repo (quel qu'il soit) + explore le code pour les
+    conventions ; s'il n'y a pas de `CLAUDE.md`, il infère les conventions du code voisin.
+  - **Aurélien** code via l'agent `crafter` + rules globales `craft.md`/`react-patterns.md` ;
+    lance les tests avec la commande détectée (`npm test`/`vitest`/`jest`/`nx test`…) et
+    `tsc` ; stratégie de tests via `test-strategy` si besoin.
+  - **Valentin** : QA navigateur seulement si une app web + un MCP navigateur sont
+    présents ; sinon il le signale et la mission se contente des tests.
+  - **Bastien/Edgar/Yugo** sont **déjà agnostiques** (diff / repo+CLAUDE.md / rules craft)
+    — Yugo devient l'angle craft principal puisqu'il n'y a pas de checklist projet.
+
+Jack écrit le mode retenu et la liste détectée/fallbacks dans `STATE.md → Décisions`.
+
 ## Sortie
 
 Jack consigne dans `STATE.md → Décisions autonomes` la liste des skills **détectés** et

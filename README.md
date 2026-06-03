@@ -109,8 +109,24 @@ Construit par briques (voir `CHANGELOG` / commits) :
 - **B2** ✅ Review-fanout (3 chasseurs, asymétrie d'information).
 - **B3** ✅ QA Playwright.
 - **B4** ✅ Ship + commandes de cycle (`/uzi-status`, `/uzi-resume`).
-- **B5** Agent Teams (`--team`) — *itération*.
-- **B6** Extensibilité multi-repo — *itération*.
+- **B5** ✅ *(branche `next`)* Agent Teams (`--team`, Dev persistant) + `/uzi-modif`.
+- **B6** ✅ *(branche `next`)* Extensibilité multi-repo (mode générique).
+
+> `main` = v0.1 stable (validée sur btoc). B5/B6 cuisent sur `next` ; un
+> `/plugin marketplace update` ne les tire pas tant qu'elles ne sont pas mergées.
+
+## Sur un autre repo (extensibilité)
+
+uzi n'a **aucune** règle métier câblée. Au pré-check, le skill `uzi-local-skills`
+détecte les skills du repo et tranche un **mode** :
+
+- **Mode projet** (ex. btoc-frontend) : les personas délèguent aux skills `btoc-*`.
+- **Mode générique** (repo non outillé) : Aurélien code via l'agent `crafter` + les rules
+  globales `craft.md`/`react-patterns.md`, Théo/Edgar lisent le `CLAUDE.md` du repo (ou
+  infèrent du code), Yugo devient l'angle craft principal, Valentin ne fait la QA
+  navigateur que si une app web + un MCP navigateur existent.
+
+Mêmes personas, même flow — seules les capacités locales changent.
 
 ## Licence
 
