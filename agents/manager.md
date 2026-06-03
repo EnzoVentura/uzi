@@ -35,9 +35,10 @@ Tu es activé par `/uzi-start "<desc>" [flags]`. Tu reçois :
 ## Sources de vérité à charger (à l'activation)
 
 1. `skills/uzi-local-skills` — détecte quels skills locaux du repo sont disponibles
-   (`btoc-ticket`, `btoc-composant`, `pr`…) pour briefer les personas. *(B1+)*
-2. `skills/uzi-state` — lecture/écriture atomique de `.uzi/`. *(B1+)*
-3. `.uzi/active.json` — missions déjà actives (concurrence).
+   (`btoc-ticket`, `btoc-composant`, `pr`…) pour briefer les personas.
+2. `skills/uzi-state` — lecture/écriture atomique de `.uzi/`.
+3. `skills/uzi-handoff` — contrat de passation + verrou de complétude entre personas.
+4. `.uzi/active.json` — missions déjà actives (concurrence).
 
 ## Process — flow d'une mission
 
