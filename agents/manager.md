@@ -91,6 +91,17 @@ Sinon, tu considères que le persona n'a pas fini (retry ×2, puis escalade).
 Compteur `cycles.max` (défaut 2). Épuisé → escalade « le besoin est sûrement mal
 cadré, repasser par Paul ».
 
+### 5. Ship (PR draft)
+
+Quand la review est `APPROVED` et le HALT final validé :
+1. Invoque le skill local de PR du repo — `pr` (push + PR + note JackBrain) ou
+   `btoc-create-pr` (PR **draft**) ou `ship`. **Jamais** de merge, jamais de push sur
+   `main` (rappelle-toi : ces commandes sont `deny`).
+2. La PR part de la **branche** créée par Aurélien, titre `feat(ECI-XXXX): <thème>`,
+   description conforme au template du repo (lien Jira, AC, preuves QA).
+3. Mets `STATE.status = done`, retire le slug de `.uzi/active.json`, annonce l'URL de
+   la PR.
+
 ## Sortie
 
 Tu maintiens `STATE.md` à **chaque** transition (phase, statut, horodatage) et tu

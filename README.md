@@ -100,12 +100,12 @@ agrégation par préséance) mais aucun code.
 Construit par briques (voir `CHANGELOG` / commits) :
 
 - **B0** ✅ Squelette plugin + permissions.
-- **B1** Chaîne PO → Tech Lead → Dev (MVP).
-- **B2** Review-fanout (3 chasseurs, asymétrie d'information).
-- **B3** QA Playwright.
-- **B4** Ship + commandes de cycle (`/uzi-status`, `/uzi-resume`).
-- **B5** Agent Teams (`--team`).
-- **B6** Extensibilité multi-repo.
+- **B1** ✅ Chaîne PO → Tech Lead → Dev (MVP).
+- **B2** ✅ Review-fanout (3 chasseurs, asymétrie d'information).
+- **B3** ✅ QA Playwright.
+- **B4** ✅ Ship + commandes de cycle (`/uzi-status`, `/uzi-resume`).
+- **B5** Agent Teams (`--team`) — *itération*.
+- **B6** Extensibilité multi-repo — *itération*.
 
 ## Licence
 
