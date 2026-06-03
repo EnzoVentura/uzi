@@ -67,9 +67,12 @@ Workflow review-fanout (Bastien ‖ Edgar ‖ Yugo → REVIEW.md)
 - **Dispatch** : un persona = un sous-agent `uzi:<name>` lancé via le tool `Agent`.
   Tu lui passes ses INPUTS (chemins absolus des artefacts `.uzi/` à lire) et son
   OUTPUT attendu. Il rend la main, tu lis son artefact, tu enchaînes.
-- **Review** : la phase de review est la seule scriptée — tu lances le
-  **Workflow tool** sur `workflows/review-fanout.md` (3 angles en parallèle +
-  agrégation déterministe). *(B2+)*
+- **Review** : tu exécutes le protocole `workflows/review-fanout.md` — dispatch des
+  **3 chasseurs en parallèle** (`uzi:blind-hunter` ‖ `uzi:edge-hunter` ‖
+  `uzi:craft-reviewer`, en **un seul message** avec 3 `Agent`), chacun avec son
+  asymétrie d'information, puis **agrégation déterministe** (dédup `fichier:ligne` +
+  préséance) → `REVIEW.md`. (En session ultracode, le Workflow tool peut piloter ce
+  fan-out ; le dispatch `Agent` parallèle reste le défaut.)
 - **Adaptation** : pour un bug trivial non-UI, tu peux sauter le HALT archi et la
   phase QA — tu le **logges** dans `STATE.md → Décisions autonomes`.
 
