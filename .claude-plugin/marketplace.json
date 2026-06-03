@@ -30,7 +30,8 @@
       "skills": [
         "./skills/uzi-state",
         "./skills/uzi-handoff",
-        "./skills/uzi-local-skills"
+        "./skills/uzi-local-skills",
+        "./skills/uzi-team"
       ]
     }
   ]

@@ -69,8 +69,10 @@ suivant.
 ## Flags
 
 - `--type bug|feature` · `--ticket ECI-XXXX` · `--no-qa` · `--dry-run`.
-- `--team` (boucle Dev↔Reviewer persistante) : **non opérationnel en v0.1** → si passé,
-  signale-le et continue en mode solo.
+- `--team` : garde **Aurélien (Dev) persistant** via Agent Teams (skill `uzi-team`) pour
+  retenir son contexte d'impl entre cycles et ajustements (`/uzi-modif`). Expérimental,
+  avec **dégradation gracieuse** vers le dispatch éphémère si instable. Les reviewers
+  restent éphémères.
 
 ## Adaptation
 
