@@ -1,0 +1,32 @@
+{
+  "name": "uzi",
+  "owner": {
+    "name": "Enzo Ventura"
+  },
+  "description": "Équipe d'agents à personas développés — orchestration native Claude Code (sans AoE) pour livrer features/bugs de bout en bout.",
+  "license": "MIT",
+  "homepage": "https://github.com/EnzoVentura/uzi",
+  "repository": "https://github.com/EnzoVentura/uzi",
+  "keywords": [
+    "multi-agent",
+    "personas",
+    "orchestrator",
+    "frontend",
+    "react",
+    "review",
+    "qa",
+    "playwright",
+    "claude-code"
+  ],
+  "plugins": [
+    {
+      "name": "uzi",
+      "source": "./",
+      "description": "uzi — équipe d'agents (Manager, PO, Tech Lead, Dev, QA, chasseurs de review) pour le développement web orchestré en une seule session.",
+      "version": "0.1.0",
+      "author": {
+        "name": "Enzo Ventura"
+      }
+    }
+  ]
+}

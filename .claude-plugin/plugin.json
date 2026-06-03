@@ -1,0 +1,22 @@
+{
+  "name": "uzi",
+  "version": "0.1.0",
+  "description": "Équipe d'agents à personas développés pour livrer features/bugs de bout en bout sur un repo React/TS. 100% natif Claude Code, sans AoE. btoc-first, extensible.",
+  "author": {
+    "name": "Enzo Ventura"
+  },
+  "homepage": "https://github.com/EnzoVentura/uzi",
+  "repository": "https://github.com/EnzoVentura/uzi",
+  "license": "MIT",
+  "keywords": [
+    "multi-agent",
+    "personas",
+    "orchestrator",
+    "frontend",
+    "react",
+    "review",
+    "qa",
+    "playwright",
+    "claude-code"
+  ]
+}

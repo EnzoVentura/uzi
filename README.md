@@ -1,0 +1,112 @@
+# uzi
+
+> Une **équipe d'agents à personas développés** qui livre une feature ou un bug de
+> bout en bout, orchestrée depuis **une seule session Claude Code** — sans AoE.
+
+`uzi` est un plugin Claude Code. Il met en scène une petite équipe (Manager, PO, Tech
+Lead, Dev, QA, et une escouade de review) qui exécute le flow complet d'une tâche :
+
+> **besoin → compréhension de l'existant → ajout/correction → vérification autonome
+> (Playwright) → review interne adversariale → PR avec descriptif.**
+
+Le plugin ne contient **aucune règle métier** : les personas délèguent tout le savoir
+technique aux **skills locaux du repo** (sur btoc-frontend : `btoc-composant`,
+`btoc-hook`, `btoc-ticket`, `pr`…). C'est ce qui le rend portable : sur un autre repo,
+les mêmes personas s'appuient sur les skills de ce repo.
+
+## Le casting
+
+| Persona | Rôle | Ce qu'il fait |
+|---|---|---|
+| **Jack** | Manager / orchestrateur | Pilote la mission, dispatche, ne code jamais. |
+| **Paul** | PO / Analyste du besoin | Cadre le besoin en critères d'acceptation vérifiables. |
+| **Théo** | Tech Lead / Architecte | Cartographie l'existant, fixe les garde-fous, découpe. |
+| **Aurélien** | Dev / implémenteur | Code (skills btoc), teste, commite sur une branche. |
+| **Valentin** | QA | Vérifie l'app réelle via **Playwright** (+ a11y), preuves à l'appui. |
+| **Bastien** | Blind Hunter | Review de la **diff seule**, sans aucun contexte. |
+| **Edgar** | Edge Case Hunter | Diff + repo + `CLAUDE.md` : cas limites & conventions projet. |
+| **Yugo** | Craft Reviewer | `craft.md` / `react-patterns.md` : SRP, immutabilité, React 19. |
+
+## Le flow
+
+```
+/uzi-start "ECI-1234: ..." 
+  → Paul (BESOIN)      → [HALT]
+  → Théo (ARCHI)       → [HALT]
+  → Aurélien (IMPL : code + commits branche)
+  → Valentin (QA Playwright)
+  → review-fanout (Bastien ‖ Edgar ‖ Yugo → REVIEW)
+  → APPROVED → [HALT] → PR draft        |  CHANGES_REQUESTED → corrections → re-review
+```
+
+Trois **halts** de validation (besoin, découpage, avant PR) ; tout le reste est
+autonome. L'état de la mission vit dans `.uzi/<slug>/` (gitignoré).
+
+## Moteur
+
+100 % natif Claude Code, **zéro AoE** :
+- **personas = subagents** (`agents/*.md`), dispatchés par Jack via le tool `Agent` ;
+- **review = Workflow tool** (`workflows/review-fanout.md`), fan-out parallèle à
+  asymétrie d'information + agrégation déterministe ;
+- **Agent Teams** (expérimental) en option `--team` pour une boucle Dev↔Reviewer
+  persistante (itération).
+
+## Installation
+
+```bash
+# Ajouter le marketplace local (ou via GitHub une fois publié)
+/plugin marketplace add EnzoVentura/uzi
+/plugin install uzi@uzi
+```
+
+## Permissions (repo cible)
+
+Le Dev commite/pushe déjà sur une branche (autorisé), et le QA lance l'app via
+**`npx nx serve <app>`** (ex. `npx nx serve web` → port 4200) — déjà couvert par le
+`Bash(npx nx *)` de `settings.local.json`. On **n'ajoute pas** `npm run start:*` en
+`allow` : `settings.json` (policy d'équipe) le `deny`, et `deny` l'emporte sur `allow`.
+
+La seule chose à ajouter, c'est la **protection de `main`** dans le `deny` local
+(`.claude/settings.local.json`, gitignoré = config perso) :
+
+```jsonc
+{
+  "permissions": {
+    "deny": [
+      "Bash(git push origin main)",
+      "Bash(git push -u origin main)",
+      "Bash(git push * main)",
+      "Bash(git merge main)",
+      "Bash(gh pr merge:*)"
+    ]
+  }
+}
+```
+
+> ⚠️ Ces `deny` sont une **première couche** (un `git *` large peut être contourné par
+> des variantes exotiques). La protection robuste de `main` reste la *branch protection*
+> GitHub côté serveur.
+
+## uzi vs jack
+
+`jack` (l'autre orchestrateur du même auteur) repose sur **AoE** (sessions/worktrees
+externes, vrai parallélisme multi-tâches). `uzi` fait un choix différent : **natif,
+mono-session, personas-RP-first**, avec vérification **Playwright** intégrée et une
+escouade de review nommée. Les deux partagent des *patterns* (verrou de complétude,
+agrégation par préséance) mais aucun code.
+
+## État du projet
+
+Construit par briques (voir `CHANGELOG` / commits) :
+
+- **B0** ✅ Squelette plugin + permissions.
+- **B1** Chaîne PO → Tech Lead → Dev (MVP).
+- **B2** Review-fanout (3 chasseurs, asymétrie d'information).
+- **B3** QA Playwright.
+- **B4** Ship + commandes de cycle (`/uzi-status`, `/uzi-resume`).
+- **B5** Agent Teams (`--team`).
+- **B6** Extensibilité multi-repo.
+
+## Licence
+
+MIT — Enzo Ventura.

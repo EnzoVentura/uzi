@@ -1,0 +1,9 @@
+# OS
+.DS_Store
+
+# Node (si tooling ajouté plus tard)
+node_modules/
+*.log
+
+# Artefacts runtime d'une mission (créés dans les repos cibles, jamais ici)
+.uzi/
